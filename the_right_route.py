@@ -18,11 +18,11 @@ class TheRightRoute():
                                       (self.route.coords[-1][0]-self.route.coords[-2][0]))
         finish_line = LineString([
             Point(
-                self.route.coords[-1][0] - acceptable_distance * np.sin(RouteEndAngle),
-                self.route.coords[-1][1] + acceptable_distance * np.cos(RouteEndAngle)),
+                self.route.coords[-1][0] - self.acceptable_distance * np.sin(RouteEndAngle),
+                self.route.coords[-1][1] + self.acceptable_distance * np.cos(RouteEndAngle)),
             Point(
-                self.route.coords[-1][0] + acceptable_distance * np.sin(RouteEndAngle),
-                self.route.coords[-1][1] - acceptable_distance * np.cos(RouteEndAngle))
+                self.route.coords[-1][0] + self.acceptable_distance * np.sin(RouteEndAngle),
+                self.route.coords[-1][1] - self.acceptable_distance * np.cos(RouteEndAngle))
         ])
         return finish_line
 
