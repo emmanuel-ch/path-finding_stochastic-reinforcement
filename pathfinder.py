@@ -8,15 +8,17 @@ import ipywidgets as widgets
 import geopandas as gpd
 
 class PathFinder():
-    def __init__(self, the_right_route, finder_strategy, acceptable_distance, n_cars, n_steps, n_loops, step_length):
+    def __init__(self, the_right_route, finder_strategy, acceptable_distance, n_cars, n_steps, n_loops, step_length, max_steering):
         self.the_right_route = the_right_route
-        self.finder_strategy = finder_strategy # Why not generate instance of strategy WITHIN here? (more safe re variables)
         
         self.acceptable_distance = acceptable_distance
         self.n_cars = n_cars
         self.n_steps = n_steps
         self.n_loops = n_loops
         self.step_length = step_length
+        self.max_steering = max_steering
+        
+        self.finder_strategy = finder_strategy(self.n_cars, self.n_steps, self.max_steering)
         
         self.vehicles_history = None
     
