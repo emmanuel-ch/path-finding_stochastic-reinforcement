@@ -2,6 +2,8 @@
 
 This is an experience of automated learning by using a strategy driven by stochastic generation of solution and positive reinforcement.
 
+![Example of path-finding](Assets/Screenshot-Labyrinth.png?raw=true "Example of path-finding")
+
 ## Framework & Usage
 
 It takes the analogy of cars driving on a pre-defined track.
@@ -13,7 +15,7 @@ It takes the analogy of cars driving on a pre-defined track.
 Open / run the main notebook Main experiment notebook.ipynb
 
 ## Requirements
-Non-standard packages used:
+Developed on Python 3.10. Non-standard packages used:
 - numpy
 - pandas
 - tqdm
