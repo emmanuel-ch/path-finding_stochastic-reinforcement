@@ -4,7 +4,6 @@ from tqdm import tqdm
 from itertools import takewhile
 from shapely.geometry import Point, LineString
 import matplotlib.pyplot as plt
-import ipywidgets as widgets
 import geopandas as gpd
 
 class PathFinder():
@@ -61,8 +60,9 @@ class PathFinder():
         return self.the_right_route.route.project(Point(list(trajectory.coords)[-1]))
     
     
-    def display_interactive_plot(self):
-        widgets.interact(self.plot_path, loop = widgets.IntSlider(
+    def display_interactive_plot_notebook(self):
+        import ipywidgets as widgets
+        widgets.interact(self.plot_path_notebook, loop = widgets.IntSlider(
             value=0,
             min=0,
             max=self.n_loops,
@@ -77,8 +77,7 @@ class PathFinder():
         ));
     
     
-    def plot_path(self, loop):
-        vehicles = self.vehicles_history.loc[self.vehicles_history['Loop'] == loop]
+    def make_gdf_shapes_on_map(self, vehicles, loop):
         shapes_on_map = [{'geometry': self.the_right_route.start_pt, 'name': 'Start'},
                          {'geometry': self.the_right_route.finish_line, 'name': 'Finish'},
                          {'geometry': self.the_right_route.route.buffer(self.acceptable_distance, cap_style=2), 'name': 'Route to follow'}]
@@ -87,7 +86,12 @@ class PathFinder():
             'name': f'Car{row.name}'
         }), axis=1)
 
-        gdf = gpd.GeoDataFrame(shapes_on_map)
+        return gpd.GeoDataFrame(shapes_on_map)
+    
+    
+    def plot_path_notebook(self, loop):
+        vehicles = self.vehicles_history.loc[self.vehicles_history['Loop'] == loop]
+        gdf = self.make_gdf_shapes_on_map(vehicles, loop)
         ax = gdf.plot(column='name', figsize=(12,6), cmap='RdYlBu')#, legend=True)
         ax.set_title(f"Loop {loop} || Max score {vehicles['Score'].max():.2f} || Max dist from start {vehicles['DistanceFromStart'].max():.2f}", y=1.0, pad=-14, fontsize=8)
 
@@ -96,4 +100,50 @@ class PathFinder():
         plt.ylim(dims[1], dims[3])
         plt.grid()
         plt.show()
+    
+    
+    def plot_path(self, loop):
+        vehicles = self.vehicles_history.loc[self.vehicles_history['Loop'] == loop]
+        gdf = self.make_gdf_shapes_on_map(vehicles, loop)
+        
+        self.ax.clear()
+        self.ax.set_xlim(self.the_right_route.route.bounds[0] - 1.5 * self.acceptable_distance, self.the_right_route.route.bounds[2] + 1.5 * self.acceptable_distance)
+        self.ax.set_ylim(self.the_right_route.route.bounds[1] - 1.5 * self.acceptable_distance, self.the_right_route.route.bounds[3] + 1.5 * self.acceptable_distance)
+        self.ax.set_aspect('equal', adjustable='box')
+        
+        self.ax = gdf.plot(column='name', figsize=(12,6), cmap='RdYlBu', ax=self.ax)
+        
+        self.ax.set_title(f"Loop {loop} || Max score {vehicles['Score'].max():.2f} || Max dist from start {vehicles['DistanceFromStart'].max():.2f}", fontsize=8)
+        self.fig.canvas.draw_idle()
+        
 
+    def display_interactive_plot(self):
+        from matplotlib.widgets import Slider
+        
+        self.fig, self.ax = plt.subplots()
+        self.fig.suptitle('Path finding by stochastic reinforcement', fontsize=16)
+        
+        loop = 0
+        self.plot_path(loop)
+        self.ax.set_position([0.05, 0.15, 0.90, 0.75])
+        
+        self.fig.subplots_adjust(bottom=0.15)
+        
+        # Horizontal slider
+        ax_loopchoser = self.fig.add_axes([0.20, 0.05, 0.70, 0.03])
+        loopchoser_slider = Slider(
+            ax=ax_loopchoser,
+            label=f'Loop no. [0...{self.n_loops}]',
+            valmin=0,
+            valmax=self.n_loops,
+            valinit=0,
+            valstep=1
+        )
+        loopchoser_slider.label.set_size(8)
+        loopchoser_slider.on_changed(lambda loop: self.plot_path(loop))
+        
+        plt.show()
+        
+        
+        
+        
